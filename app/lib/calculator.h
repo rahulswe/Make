@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef CALCULATOR_H
+#define CALCULATOR_H
 
 /* function to add two numbers */
 uint32_t calc_add(uint32_t a, uint32_t b);
