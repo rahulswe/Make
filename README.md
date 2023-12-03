@@ -5,39 +5,49 @@ Exploring Make Build System
 ```shell
 > tree
 .
-├── inc
-│ ├── add
-│	 └── add.h
-│ ├── div
-│	 └── div.h
-│ ├── mul
-│	 └── mul.h
-│ └── sub
-│	 └── sub.h
-│ └── main.h
-├── src
-│ ├── add
-│	 └── add.c
-│ ├── div
-│	 └── div.c
-│ ├── mul
-│	 └── mul.c
-│ └── sub
-│	 └── sub.c
-│ └── main.c
 ├── LICENSE
-├── Makefile
-└── Readme.md
+├── README.md
+├── app
+│   ├── Makefile
+│   ├── lib
+│   │   ├── calculator.h
+│   │   └── libCalculator.a
+│   ├── main.c
+│   └── main.h
+└── library
+    ├── Makefile
+    ├── inc
+    │   ├── add
+    │   │   └── add.h
+    │   ├── calculator.h
+    │   ├── div
+    │   │   └── div.h
+    │   ├── mul
+    │   │   └── mul.h
+    │   └── sub
+    │       └── sub.h
+    └── src
+        ├── add
+        │   └── add.c
+        ├── calculator.c
+        ├── div
+        │   └── div.c
+        ├── mul
+        │   └── mul.c
+        └── sub
+            └── sub.c
 
-11 directories, 13 files
+14 directories, 18 files
 ```
-## Build Process
+## Try it out
 
-The application is compiled by the GCC compiler for the host machine with the help of the makefile -
+1. Compile the calculator static library - compiled library and public header file is updated in ./app/lib directory
 
 ```shell
-> make
+> make -C library
 
+mkdir -p build/obj/src/
+gcc -Iinc -Iinc/div -Iinc/mul -Iinc/sub -Iinc/add -c src/calculator.c -o build/obj/src/calculator.o
 mkdir -p build/obj/src/div/
 gcc -Iinc -Iinc/div -Iinc/mul -Iinc/sub -Iinc/add -c src/div/div.c -o build/obj/src/div/div.o
 mkdir -p build/obj/src/mul/
@@ -46,15 +56,27 @@ mkdir -p build/obj/src/sub/
 gcc -Iinc -Iinc/div -Iinc/mul -Iinc/sub -Iinc/add -c src/sub/sub.c -o build/obj/src/sub/sub.o
 mkdir -p build/obj/src/add/
 gcc -Iinc -Iinc/div -Iinc/mul -Iinc/sub -Iinc/add -c src/add/add.c -o build/obj/src/add/add.o
-mkdir -p build/obj/src/
-gcc -Iinc -Iinc/div -Iinc/mul -Iinc/sub -Iinc/add -c src/main.c -o build/obj/src/main.o
-gcc build/obj/src/div/div.o build/obj/src/mul/mul.o build/obj/src/sub/sub.o build/obj/src/add/add.o build/obj/src/main.o -o build/main
+ar -r build/libCalculator.a build/obj/src/calculator.o build/obj/src/div/div.o build/obj/src/mul/mul.o build/obj/src/sub/sub.o build/obj/src/add/add.o
+ar: creating archive build/libCalculator.a
+cp ./build/libCalculator.a ../app/lib
+cp ./inc/calculator.h ../app/lib
 ```
 
-To run the application -
+2. Compile the application executable and link the calculator library to it -
+
+```shell
+> make -C app
+
+mkdir -p build/obj/./
+gcc -I. -I./lib -c main.c -o build/obj/./main.o
+gcc -L./lib -lCalculator build/obj/./main.o -o build/main
+```
+
+3. Run the application -
+
 ```shell
 
->./build/main
+> ./app/build/main
 
 -- Calculator --
 Addition of 50 and 60 = 110
@@ -63,10 +85,15 @@ Multiplication of 50 and 60 = 3000
 Division of 50 and 60 = 0.833333
 ```
 
-To clean the build files -
+4. To clean the build files -
+
 ```shell
 
->make clean
+> make -C library clean
+
+rm -r ./build
+
+> make -C app clean
 
 rm -r ./build
 ```
